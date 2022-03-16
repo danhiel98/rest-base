@@ -1,32 +1,54 @@
 const { response, request } = require("express");
+const bcryptjs = require("bcryptjs");
 
-const userGET = (req = request, res = response) => {
-  const { name, email, start = 1 } = req.query;
+const User = require("../models/user");
+
+const userGET = async (req = request, res = response) => {
+  const { start = 0, limit = 5 } = req.query;
+
+  const query = { status: true };
+
+  const [total, users] = await Promise.all([
+    User.countDocuments(query),
+    User.find(query).skip(start).limit(limit),
+  ]);
 
   res.json({
-    msg: "GET api - controller",
-    name,
-    email,
     start,
+    limit,
+    total,
+    users,
   });
 };
 
-const userPOST = (req, res = response) => {
-  const { name, age } = req.body;
+const userPOST = async (req, res = response) => {
+  const { name, email, password, role } = req.body;
+  const user = new User({ name, email, password, role });
+
+  // Hashear contraseña
+  const salt = bcryptjs.genSaltSync(10);
+  user.password = bcryptjs.hashSync(password, salt);
+
+  await user.save();
 
   res.json({
-    msg: "POST api - controller",
-    name,
-    age,
+    user,
   });
 };
 
-const userPUT = (req, res = response) => {
+const userPUT = async (req, res = response) => {
   const { id } = req.params;
+  const { _id, email, password, google, ...rest } = req.body;
+
+  if (password) {
+    const salt = bcryptjs.genSaltSync(10);
+    rest.password = bcryptjs.hashSync(password, salt);
+  }
+
+  const user = await User.findByIdAndUpdate(id, rest);
 
   res.json({
-    msg: "PUT api - controller",
-    id,
+    user,
   });
 };
 
@@ -36,9 +58,18 @@ const userPATCH = (req, res = response) => {
   });
 };
 
-const userDELETE = (req, res = response) => {
+const userDELETE = async (req, res = response) => {
+  const { id } = req.params;
+
+  // Borrar usuario físicamente (No recomendado)
+  // const user = await User.findByIdAndDelete(id);
+
+  // Actualizar estado del usuario
+  const user = await User.findByIdAndUpdate(id, { status: false });
+
   res.json({
-    msg: "DELETE api - controller",
+    id,
+    user,
   });
 };
 
