@@ -7,13 +7,19 @@ const {
   userPATCH,
   userDELETE,
 } = require("../controllers/user");
-const { validateFields } = require("../middlewares/validation");
 
 const {
   isValidRole,
   emailExists,
   userExists,
 } = require("../helpers/db-validators");
+
+const {
+  validateFields,
+  validateJWT,
+  isAdminRole,
+  hasRoles,
+} = require("../middlewares/index");
 
 const router = Router();
 
@@ -27,7 +33,6 @@ router.post(
       min: 6,
     }),
     check("email", "El correo no es válido").isEmail(),
-    // check("role", "El rol no es válido").isIn(["ADMIN_ROLE", "USER_ROLE"]),
     check("role").custom(isValidRole),
     check("email").custom(emailExists),
     validateFields,
@@ -50,6 +55,9 @@ router.patch("/", userPATCH);
 router.delete(
   "/:id",
   [
+    validateJWT,
+    // isAdminRole,
+    hasRoles("ADMIN_ROLE", "USER_ROLE"),
     check("id", "El id no es válido").isMongoId(),
     check("id").custom(userExists),
     validateFields,
