@@ -1,7 +1,8 @@
-const { response } = require("express");
+const { request, response } = require("express");
 const bcryptjs = require("bcryptjs");
 const User = require("../models/user");
 const { generateJWT } = require("../helpers/generate-jwt");
+const { googleVerify } = require("../helpers/google-verify");
 
 const login = async (req, res = response) => {
   const { email, password } = req.body;
@@ -48,6 +49,57 @@ const login = async (req, res = response) => {
   }
 };
 
+const googleSignIn = async (req = request, res = response) => {
+  const { id_token } = req.body;
+
+  try {
+    const { name, email, img } = await googleVerify(id_token);
+
+    let user = await User.findOne({ email });
+
+    if (!user) {
+      const data = {
+        name,
+        email,
+        password: "XD",
+        img,
+        google: true,
+        role: "USER_ROLE",
+      };
+
+      user = new User(data);
+
+      await user.save();
+    } else {
+      // Hace falta la lógica cuando ya existe el usuario
+      console.log("El usuario ya existe");
+    }
+
+    console.log(user);
+
+    // Creo que sería mejor que haya validación cuando
+    // el usuario está "eliminado" y cuando está bloqueado
+    if (!user.status) {
+      return res.status(401).json({
+        msg: "Este usuario está bloqueado",
+      });
+    }
+
+    const token = await generateJWT(user.id);
+
+    res.json({
+      user,
+      token,
+    });
+  } catch (error) {
+    console.log(error);
+    res.status(400).json({
+      msg: "El token no se pudo verificar",
+    });
+  }
+};
+
 module.exports = {
   login,
+  googleSignIn,
 };
