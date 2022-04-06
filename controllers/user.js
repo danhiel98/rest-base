@@ -37,18 +37,18 @@ const userPOST = async (req, res = response) => {
 
 const userPUT = async (req, res = response) => {
   const { id } = req.params;
-  const { _id, email, password, google, ...rest } = req.body;
+  const { _id, email, status, password, google, ...rest } = req.body;
 
   if (password) {
     const salt = bcryptjs.genSaltSync(10);
     rest.password = bcryptjs.hashSync(password, salt);
   }
 
-  const user = await User.findByIdAndUpdate(id, rest);
+  await User.findByIdAndUpdate(id, rest);
 
-  res.json({
-    user,
-  });
+  const user = await User.findById(id);
+
+  res.json(user);
 };
 
 const userPATCH = (req, res = response) => {
@@ -60,16 +60,17 @@ const userPATCH = (req, res = response) => {
 const userDELETE = async (req, res = response) => {
   const { id } = req.params;
 
-  console.log("Pasamos a la opción de eliminar");
   // Obtener el uid del usuario autenticado
-  const { uid, authenticatedUser } = req;
+  const { authenticatedUser } = req;
 
   // Borrar usuario físicamente (No recomendado)
   // const user = await User.findByIdAndDelete(id);
 
   // Actualizar estado del usuario
 
-  const user = await User.findByIdAndUpdate(id, { status: false });
+  await User.findByIdAndUpdate(id, { status: false });
+
+  const user = User.findById(id);
 
   res.json({
     user,

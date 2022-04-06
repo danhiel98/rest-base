@@ -43,9 +43,8 @@ UserSchema.methods.toJSON = function () {
   return user;
 };
 
-// Validar los roles según la base de datos
-UserSchema.pre("validate", async function () {
-  this.role.enum = await Role.find();
-});
+UserSchema.methods.populate = function (params) {
+  console.log("Se ha hecho population", params);
+};
 
 module.exports = model("User", UserSchema);

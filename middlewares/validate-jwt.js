@@ -25,6 +25,7 @@ const validateJWT = async (req = request, res = response, next) => {
       });
     }
 
+    // Asignar usuario autenticado en la petición
     req.authenticatedUser = authenticatedUser;
 
     next();
