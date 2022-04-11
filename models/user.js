@@ -36,15 +36,11 @@ const UserSchema = Schema({
 
 // Quitar atributos password y __v al devolver el objeto del usuario
 UserSchema.methods.toJSON = function () {
-  const { __v, _id, password, ...user } = this.toObject();
+  const { __v, _id, status, password, ...user } = this.toObject();
 
   user.uid = _id;
 
   return user;
-};
-
-UserSchema.methods.populate = function (params) {
-  console.log("Se ha hecho population", params);
 };
 
 module.exports = model("User", UserSchema);

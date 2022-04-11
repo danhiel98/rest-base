@@ -1,14 +1,13 @@
 const { check } = require("express-validator");
 const { Router } = require("express");
 
-const { validateFields } = require("../middlewares/validation");
 const {
   categoryGET,
   categoryPOST,
   categoryPUT,
   categoryDELETE,
 } = require("../controllers/category");
-const { validateJWT, hasRoles } = require("../middlewares");
+const { validateJWT, hasRoles, validateFields } = require("../middlewares");
 const {
   categoryExists,
   categoryInDatabase,

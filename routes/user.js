@@ -19,7 +19,7 @@ const {
   validateJWT,
   isAdminRole,
   hasRoles,
-} = require("../middlewares/index");
+} = require("../middlewares");
 
 const router = Router();
 

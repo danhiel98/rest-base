@@ -75,7 +75,18 @@ const productInDatabase = async (name) => {
   }
 };
 
+const allowedCollections = async (collection, list = []) => {
+  const includes = list.includes(collection);
+
+  if (!includes) {
+    throw new Error(
+      `La colección ${collection} no es válida. Solo se permite: ${list}`
+    );
+  }
+};
+
 module.exports = {
+  allowedCollections,
   categoryExists,
   categoryInDatabase,
   emailExists,
